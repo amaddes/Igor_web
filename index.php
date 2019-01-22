@@ -44,14 +44,9 @@ if (isset($_GET["is_exit"])) { //Если нажата кнопка выхода
 ?>
 
 <?php if ($auth->isAuth()) { // Если пользователь авторизован, приветствуем:  
-    // open connection to MongoDB server
-    $client = new MongoDB\Client("mongodb://localhost:27017");
-            
-    // access collection
-   $collection = $client->clients->accounts;
+    echo "Здравствуйте, " . $auth->getLogin() ;
     
-   echo "Здравствуйте, " . $auth->getLogin() ;
-   echo "<br/><br/><a href=\"?is_exit=1\">Выйти</a>"; //Показываем кнопку выхода
+    echo "<br/><br/><a href=\"?is_exit=1\">Выйти</a>"; //Показываем кнопку выхода
 
 } 
 else { //Если не авторизован, показываем форму ввода логина и пароля

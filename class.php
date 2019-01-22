@@ -1,8 +1,34 @@
 <?php
 require 'vendor/autoload.php';
 
-class myMongo {
+class myMongo {  
         
+    public function __construct() {
+        try {
+            $client = new MongoDB\Client("mongodb://localhost:27017");
+            $this->db = $client->clients;
+        } catch (MongoConnectionException $e) {
+            return 'Error connecting to MongoDB server';
+           } catch (MongoException $e) {
+            return 'Error: ' . $e->getMessage();
+           }
+    }
+
+    public function checkAccount($login, $password)
+    {
+        $criteria = array(
+            'login' => $login,
+            'password'=> $password
+            );       
+        $result = $this->db->accounts->findOne($criteria);
+        if ($result != null) {
+            return  true;
+            }
+            else {
+            return false;
+            }
+        
+    }
 }
 class AuthClass {
      /**
@@ -23,23 +49,9 @@ class AuthClass {
      * @param string $password 
      */
     public function auth($login, $password) {
-        try {
-            // open connection to MongoDB server
-            $client = new MongoDB\Client("mongodb://localhost:27017");
-            
-             // access collection
-            $collection = $client->clients->accounts;
-            $criteria = array(
-            'login' => $login,
-            'password'=> $password
-            );       
-            $result = $collection->findOne($criteria);
-        } catch (MongoConnectionException $e) {
-            die('Error connecting to MongoDB server');
-           } catch (MongoException $e) {
-            die('Error: ' . $e->getMessage());
-        }
-        if ($result != null) { //Если логин и пароль введены правильно
+            $check = new myMongo();
+            $result = $check->checkAccount($login, $password);
+        if ($result) { //Если логин и пароль введены правильно
             $_SESSION["is_auth"] = true; //Делаем пользователя авторизованным
             $_SESSION["login"] = $login; //Записываем в сессию логин пользователя
             return true;
