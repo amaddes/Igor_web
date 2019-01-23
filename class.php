@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 require 'vendor/autoload.php';
 
