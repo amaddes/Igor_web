@@ -14,6 +14,21 @@ class myMongo {
            }
     }
 
+    public function getUnit($account, $unitType) {
+        $account_id = iterator_to_array($this->db->accounts->findOne(array('login' => $account)))['_id']->__toString();
+        $criteria = array(
+        'accaunt_id' => $account_id
+        );
+        $resultDev = iterator_to_array($this->->device->find($criteria));
+        $resultSta = iterator_to_array($this->->station->find($criteria));
+        if ($unitType == 'dev') 
+            return $resultDev;
+        else if ($unitType == 'sta') 
+            return $resultSta;
+        else
+            return null;
+    }
+    
     public function checkAccount($login, $password)
     {
         $criteria = array(
@@ -30,6 +45,7 @@ class myMongo {
         
     }
 }
+
 class AuthClass {
      /**
      * Проверяет, авторизован пользователь или нет
