@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 require 'vendor/autoload.php';
 
@@ -20,8 +19,8 @@ class myMongo {
         $criteria = array(
         'accaunt_id' => $account_id
         );
-        $resultDev = iterator_to_array($this->->device->find($criteria));
-        $resultSta = iterator_to_array($this->->station->find($criteria));
+        $resultDev = iterator_to_array($this->db->device->find($criteria));
+        $resultSta = iterator_to_array($this->db->station->find($criteria));
         if ($unitType == 'dev') 
             return $resultDev;
         else if ($unitType == 'sta') 
