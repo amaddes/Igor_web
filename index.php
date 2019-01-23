@@ -45,7 +45,18 @@ if (isset($_GET["is_exit"])) { //Если нажата кнопка выхода
 
 <?php if ($auth->isAuth()) { // Если пользователь авторизован, приветствуем:  
     echo "Здравствуйте, " . $auth->getLogin() ;
-    
+    echo 'Зарегистрированные устройства управления: </br>';
+    $device = new myMongo();
+
+    foreach ($device->getUnit($auth->getLogin(), 'dev') as $dev) {
+        print_r($dev['name']);
+        echo '</br>';
+    }
+    echo 'Зарегистрированные устройства "Дворецкий": </br>';
+    foreach ($device->getUnit($auth->getLogin(), 'sta') as $sta) {
+        print_r($sta['name']);
+        echo '</br>';
+    }
     echo "<br/><br/><a href=\"?is_exit=1\">Выйти</a>"; //Показываем кнопку выхода
 
 } 
