@@ -7,20 +7,20 @@ require 'vendor/autoload.php';
 require_once 'class.php';
 $db = new myMongo();
 $error = false;
-foreach ($_POST as $key=>$value) {
-      if ($value == "") $error = true;
+if (isset($_POST)) {
+    foreach ($_POST as $key=>$value) {
+        if ($value == "" && ($key != "password" && $key != "password2")) {
+            $error = true;
+        }
+    }
+    echo "<div id='error'>";
+    if ($db->checkAccount($_POST["login"])) echo "Такой логин уже существует</br>";
+    if ($error && (count($_POST)>0)) echo "Не все поля заполнены</br>";
+    if (isset($_POST["email"]) && ($_POST["email"] != "") && !filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) echo "Адрес email указан не верно</br>";
+    if (isset($_POST["password"]) && isset($_POST["password2"]) && $_POST["password"] == "" && $_POST["password2"] == "") echo "Не задан пароль</br>";
+    if ($_POST["password"] != $_POST["password2"]) echo "Не одинаковые пароли</br>";
+    echo "</div>";
 }
-
-
-
-    //if (count($_POST)>0) {
-     //   if (isset($_POST["login"]) && isset($_POST["password"]) && isset($_POST["password2"])) {    
-   //         echo '';
-    //        }
-    //}
-
-    if ($error && (count($_POST)>0)) echo "Не все поля заполнены";
-    if ($_POST["password"] != $_POST["password2"]) echo "Не одинаковые пароли";
     ?>
 
 
