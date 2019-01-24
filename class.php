@@ -29,12 +29,15 @@ class myMongo {
             return null;
     }
     
-    public function checkAccount($login, $password)
+    public function checkAccount($login, $password = null)
     {
         $criteria = array(
             'login' => $login,
+            );
+        $pasCriteria = array(
             'password'=> $password
-            );       
+        );
+        if ($password  != null) $criteria+=$pasCriteria;
         $result = $this->db->accounts->findOne($criteria);
         if ($result != null) {
             return  true;
@@ -44,6 +47,27 @@ class myMongo {
             }
         
     }
+
+
+
+    public function setSessionId($login, $session_id) {
+        $criteria = array(
+            'login' => $login,
+            ); 
+        $result = $this->db->accounts->updateOne($criteria,['$set'=>['session_id'=>$session_id]]);
+        return $result;
+    }
+
+    public function getUserBySession($session_id) {
+        $criteria = array(
+            'session_id' => $session_id,
+            ); 
+        $result = $this->db->accounts->findOne($criteria);
+        if ($result) {
+        return iterator_to_array($result);
+        }
+        else return "nousers";
+    }
 }
 
 class AuthClass {
@@ -52,6 +76,8 @@ class AuthClass {
      * Возвращает true если авторизован, иначе false
      * @return boolean 
      */
+    private $cookieLife = 600;
+    
     public function isAuth() {
         if (isset($_SESSION["is_auth"])) { //Если сессия существует
             return $_SESSION["is_auth"]; //Возвращаем значение переменной сессии is_auth (хранит true если авторизован, false если не авторизован)
@@ -68,6 +94,9 @@ class AuthClass {
             $check = new myMongo();
             $result = $check->checkAccount($login, $password);
         if ($result) { //Если логин и пароль введены правильно
+            $better_token = md5(uniqid(rand(),1));
+            setcookie("session_id",$better_token,time()+$this->cookieLife);
+            $check->setSessionId($login, $better_token);
             $_SESSION["is_auth"] = true; //Делаем пользователя авторизованным
             $_SESSION["login"] = $login; //Записываем в сессию логин пользователя
             return true;
