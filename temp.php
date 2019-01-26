@@ -1,18 +1,17 @@
 <?php
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-$better_token = md5(uniqid(rand(),1));
-$regLink = '<a href="https://butlerigor.ru/registration.php?reg='.$better_token.'">Подтвердить регистрацию</a>';
-$file = 'reg-email.html';
-$FileSourse = file_get_contents($file);
-$FileSourse = str_replace('<!--Add regLink-->',$regLink,$FileSourse);
 require 'PHPMailer-master/src/Exception.php';
 require 'PHPMailer-master/src/PHPMailer.php';
 require 'PHPMailer-master/src/SMTP.php';
 
-function smtpmailer($to, $from, $from_name, $subject, $body) { 
+function smtpmailer($to, $from, $from_name, $subject, $regToken) { 
     global $error;
     $mail = new PHPMailer();  // create a new object
+    $regLink = '<a href="https://butlerigor.ru/registration.php?reg='.$regToken.'">Подтвердить регистрацию</a>';
+    $file = 'reg-email.html';
+    $FileSourse = file_get_contents($file);
+    $FileSourse = str_replace('<!--Add regLink-->',$regLink,$FileSourse);
     $mail->IsSMTP(); // enable SMTP
     $mail->SMTPDebug = 4;  // debugging: 1 = errors and messages, 2 = messages only
     $mail->SMTPAuth = true;  // authentication enabled
@@ -28,11 +27,12 @@ function smtpmailer($to, $from, $from_name, $subject, $body) {
     );
     $mail->Host = 'mail.1c-bas.ru';
     $mail->Port = 587; 
-    $mail->Username = "admin@butlerigor.ru";  
-    $mail->Password = "Parol28071982!";           
+    $mail->Username = "registration@butlerigor.ru";  
+    $mail->Password = "req1w2!+";
+    $mail->CharSet = 'UTF-8';           
     $mail->SetFrom($from, $from_name);
     $mail->Subject = $subject;
-    $mail->msgHTML($body);
+    $mail->msgHTML($FileSourse);
     $mail->AddAddress($to);
     if(!$mail->Send()) {
     $error = 'Mail error: '.$mail->ErrorInfo; 
@@ -42,7 +42,7 @@ function smtpmailer($to, $from, $from_name, $subject, $body) {
     return true;
     }
    }
-$sending = smtpmailer("amadeus@tplast.org", "admin@butlerigor.ru", "admin", "test", $FileSourse);
+$regToken = md5(uniqid(rand(),1));
+$sending = smtpmailer("amadeus@tplast.org", "registration@butlerigor.ru", "Registration Bot", "Регистрация нового пользователя", $regToken);
 var_dump($sending);
 ?>
-
