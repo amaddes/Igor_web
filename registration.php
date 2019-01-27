@@ -9,33 +9,54 @@ require 'functions.php';
 
 $db = new myMongo();
 $error = false;
-if (isset($_GET)){
+if (isset($_GET['reg'])){
+    if ($db->Reg($_GET['reg'])) {
+        echo "Регистрация завершена.";
+    }
+}
+if (isset($_GET['regsend'])){
     if($_GET['regsend'] == 1){
         echo "Письмо с регистрацией было отправленно вам на указанную почту";
         //echo $_POST["email"];
         //var_dump(isset($_POST["login"]));
     }
 }
-if (isset($_POST)) {
-    foreach ($_POST as $key=>$value) {
-        if ($value == "" && ($key != "password" && $key != "password2")) {
-            $error = true;
-        }
+foreach ($_POST as $key=>$value) {
+    if ($value == "" && ($key != "password" && $key != "password2")) {
+        $error = true;
     }
-    echo "<div id='error'>";
-    if ($db->checkAccount($_POST["login"])) echo "Такой логин уже существует</br>";
-    elseif ($error && (count($_POST)>0)) echo "Не все поля заполнены</br>";
-    elseif (isset($_POST["email"]) && ($_POST["email"] != "") && !filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) echo "Адрес email указан не верно</br>";
-    elseif (isset($_POST["password"]) && isset($_POST["password2"]) && $_POST["password"] == "" && $_POST["password2"] == "") echo "Не задан пароль</br>";
-    elseif ($_POST["password"] != $_POST["password2"]) echo "Не одинаковые пароли</br>";
-    elseif (!$error && isset($_POST["login"]) && isset($_POST["disName"]) && filter_var($_POST["email"], FILTER_VALIDATE_EMAIL) && ($_POST["password"] == $_POST["password2"])) {
-        $regToken = md5(uniqid(rand(),1));
-        $sending = smtpmailer($_POST["email"], "registration@butlerigor.ru", "Registration Bot", "Регистрация нового пользователя ".$_POST["login"] , $regToken);
-        unset($_POST);
-        header("Location: ?regsend=1");
-    }
-    echo "</div>";
 }
+echo "<div id='error'>";
+if ($db->checkAccount($_POST["login"],null,$_POST["email"])) {
+    echo "Пользователь с таким логином или email уже существует</br>";
+
+}
+elseif ($error && (count($_POST)>0)) {
+    echo "Не все поля заполнены</br>";
+    $error = true;
+}
+elseif (isset($_POST["email"]) && ($_POST["email"] != "") && !filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
+    echo "Адрес email указан не верно</br>";
+        $error = true;
+}
+elseif (isset($_POST["password"]) && isset($_POST["password2"]) && $_POST["password"] == "" && $_POST["password2"] == "") {
+        echo "Не задан пароль</br>";
+        $error = true;
+}
+elseif ($_POST["password"] != $_POST["password2"]) {
+        echo "Не одинаковые пароли</br>";
+        $error = true;
+}
+elseif (!$error && (count($_POST)>0)) {
+    echo "no error";
+    $regToken = md5(uniqid(rand(),1));
+    $db->Reg($regToken, $_POST["login"], $_POST["disName"], $_POST["email"], $_POST["password"]);
+    $sending = smtpmailer($_POST["email"], "registration@butlerigor.ru", "Registration Bot", "Регистрация нового пользователя ".$_POST["login"] , $regToken);
+    unset($_POST);
+    header("Location: ?regsend=1");
+    }
+echo "</div>";
+
     ?>
         <h2>Регистрация</h2>
         <p>Введите свой логин и пароль</p>

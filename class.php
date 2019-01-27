@@ -28,8 +28,45 @@ class myMongo {
         else
             return null;
     }
+
+    public function Reg($regToken, $login = null, $disName = null, $email = null, $password = null)
+    {
+        if (isset($login) && isset($disName) && isset($email) && isset($password)) {
+                $newUser = array (
+                    "createdAt" => new MongoDB\BSON\UTCDateTime(),
+                    "token" => $regToken, 
+                    "login" => $login, 
+                    "disName" => $disName, 
+                    "email" => $email, 
+                    "password" => $password,
+                );
+            
+                $this->db->registration->insertOne($newUser);
+                return true;
+            }
+        else {
+            $criteria = array (
+                'token' => $regToken,
+            );
+            $result = $this->db->registration->findOne($criteria);
+            if ($result != null) {
+                $user = array (
+                    'login' => $result->login,
+                    'password' => $result->password,
+                    'display_name' => $result->disName,
+                    'email' => $result->email,
+                );
+                $this->db->accounts->insertOne($user);
+                
+                return true;
+                }
+                else {
+                return false;
+                };
+        }
+    }
     
-    public function checkAccount($login, $password = null)
+    public function checkAccount($login, $password = null, $email = null)
     {
         $criteria = array(
             'login' => $login,
@@ -37,14 +74,29 @@ class myMongo {
         $pasCriteria = array(
             'password'=> $password
         );
+
+        $emailCriteria = array(
+            'email' => $email
+        );
         if ($password  != null) $criteria+=$pasCriteria;
         $result = $this->db->accounts->findOne($criteria);
-        if ($result != null) {
-            return  true;
+        if ($email != null) {
+            $accoutRes = $this->db->registration->findOne($criteria);
+            $emailRes = $this->db->registration->findOne($emailCriteria);
+            $email2Res = $this->db->accounts->findOne($emailCriteria);
+            if ($regresult != null) {
+                return  true;
             }
             else {
             return false;
-            }
+            };
+        }
+        if ($result != null) {
+            return  true;
+        }
+        else {
+            return false;
+        };
         
     }
 
